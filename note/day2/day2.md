@@ -30,3 +30,9 @@
     + 只考虑了评分矩阵，没有考虑 user、item、context 等特征；
     + 对于没有历史行为的用户，无法冷启动；
 ![mf](pic/mf.png)
+
++ Swing (构建 user-item 二部图捕获产品间的相似关系)
+  + Swing 算法：利用用户的购买行为计算商品之间的相似性；
+![swing1](pic/example_of_swing.jpeg)
+![swing2](pic/swing_algo.png)
+  + Surprise 算法：
