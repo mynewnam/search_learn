@@ -49,3 +49,25 @@
   + item2vec: 直接类比了 word2vec，将一类物品集合 (set) 替代了原本的句子 (sentence) 的概念；$L = \sum_{(i,j) \in D^+}( \log \sigma(v_i \cdot v_j) + \sum_{k=1}^{K} \mathbb{E}_{item_k \sim P_n(i)} [\log \sigma(-v_i \cdot v_k)])$
 
 + Airbnb 召回
+  + 用户**短期**特征学习 list Embedding
+    + 直接采用了 Word2Vec 的 Skip-Gram 思想，将用户的每个 session $s = (l_1, l_2, ..., l_M)$，训练其 Embedding 向量；
+    + 改进：将最终预定的房间作为全局的 positive listing；负样本除了随机采样之外，在租房区域内部选择了困难的负样本。
+    + 损失函数：$L = -(\sum_{(l,c) \in D_{positive}}\frac{1}{1+e^{-v_c^{'}v_l}} + \sum_{(l,c) \in D_{negetive}}\frac{1}{1+e^{v_c^{'}v_l}} + \frac{1}{1+e^{-v_{booked}^{'}v_l}} + \sum_{(l,c) \in D_{region}}\frac{1}{1+e^{-v_c^{'}v_l}})$，其中 $v_l$ 为中心 listing；
+      ![airbnb](pic/airbnb.png)
+    + listing Embedding 冷启动：根据标签特征寻找相近的 listing，对其 Embedding 做均值，可以解决大部分问题；
+    + 评估方式：降维 (t-SNE) / 聚类 (KMeans)，观察区域相关性、风格相关性、价格相关性等；
+  + 用户**长期**兴趣学习 User-type & Listing-type Embedding
+    + 存在问题：用户兴趣是基于 booking list 的，但是长度短且稀疏，难以学习；
+    + 解决方式：不针对每一个 item 学习 Embedding，而是针对每一种 type 学习 Embedding，这样不同的 item 会共享一部分 Embedding；
+      ![user_type](pic/user_type.png)
+    + 输入样本：为了让 user_type 和 listing_type 处于同一个向量空间，因此需要联合训练，故训练样本 session $s = \{(u_1, l_1), (u_2, l_2), ..., (u_M, l_M)\}$；注意，user_type 和 listing type 会**随着时间发生改变**。
+    + 额外负样本：用户预定但被拒绝的 listing；从而为 Embedding 加入了客户与主人的**偏好**；
+    + 训练方式：同样采用 Skip-gram 的方式；$L = -(\sum_{(l,c) \in D_{booked}}\frac{1}{1+e^{-v_c^{'}v_l}} + \sum_{(l,c) \in D_{negetive}}\frac{1}{1+e^{v_c^{'}v_l}} + \sum_{(l,c) \in D_{reject}}\frac{1}{1+e^{v_c^{'}v_l}})$；其中，$l$ 既可以是 user，也可以是 listing；$c$ 包含了上下文的 user 和 listing；
+      ![listing](pic/type.png)
+  + 召回结果的评估
+    + 离线评估：整理一个候选房源的列表；用户每次点击时，计算 clicked_listing 与所有 candidate_listing 的相似度，并查看 booked_listing 在所有 candidate_listing 的排名；排名越低，说明 Embedding 的效果越好；
+      + 只看 AUC 不一定好 (召回热门 item 的 AUC 一般就很高)；还要考虑新颖、互补、topK 等；
+      + 拿 topK 与用户点击做交集也不一定好，因为召回的物品可能没有给用户曝光过 (没有被点击不一定用户不感兴趣)；
+    + 召回结果用于排序：构建了 GBDT 模型
+      + 对于召回得到的 listing，构造用户 user 与 listing 的相似度特征，用这些相似度特征进行排序；
+        ![ranking](pic/ranking.png)
