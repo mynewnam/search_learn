@@ -82,3 +82,19 @@
   + 结果：用户向量是网络输出；物品向量是 word2vec 的 output 向量；online 时采用近邻搜索完成召回工作；
 
 + 双塔模型召回
+  + DSSM 双塔架构：查询塔 (query) 与文档塔 (document)
+    ![arch](pic/DSSM_arch.png)
+    + 具体技术： Word Hashing (现在应该已经不用了吧)
+      + 对于每个单词，统计其所有 N-gram 哈希后的位置；构建一个大小为 N 的向量，向量中对应位置置为 1；结果是一个比原始 one-hot 向量维度小得多的表示；
+  + 召回双塔结构：用户塔 (user) 和物料塔 (item)
+    ![tower](pic/tower.png)
+  + SENet 双塔模型：对特征进行加权 (channel 等价于不同的 feature)
+    ![SENet](pic/SENet.png)
+    + 由于 user 和 item 交互的位置太晚，原始特征可能会被扭曲；通过 SENet 加权，可以增加高频特征的权重，避免低频不靠谱的特征 embedding 的影响；
+  + 多目标双塔模型：共享 Embedding 参数，其他系数分别训练；
+  + Youtube 双塔模型：主要解决采样带来的偏差
+    ![process](pic/process.png)
+    ![flow](pic/flow.png)
+    ![model](pic/model_tower.png)
+    + 技巧点：重要性采样，将 in-batch 损失逼近全局损失；最上层 embedding 的归一化，使得内积大小关系 (训练时) 与距离大小关系 (推理时) 相同；温度系数增加相似度范围；
+    + 这是一个类似于 item2item 的双塔，用于视频的相关推荐当中。
