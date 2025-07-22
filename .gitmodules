@@ -1,0 +1,3 @@
+[submodule "code/package/transformers"]
+	path = code/package/transformers
+	url = https://github.com/huggingface/transformers.git
