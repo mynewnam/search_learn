@@ -40,6 +40,12 @@
     + 升维并非常见的 4 倍，为保持参数数量近似，约为 2.67 倍
 ![llama3_2](pic/llama3_2.png)
 
+### Pre Training
++ 采用 Cross-Entropy 损失函数
+
+### Post Training
++ SFT + DPO
+
 ### 参数配置
 ![llama3_5](pic/llama3_5.png)
 
