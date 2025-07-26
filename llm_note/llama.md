@@ -34,6 +34,7 @@
     + 由于预测 next token 只需要前一个 Q 值，因此没有 Q cache
     + register_buffer 能够让非训练的常数随 model 移动到 GPU
     + nn.Sequential 自动顺序执行，nn.ModuleList 需要手动执行每一层，因此更加灵活
+    + (可采用的优化) Sliding Windows with KV cache，但要在训练时添加支持 (Mistral)
   + FFN (SwiGLU)
     + 采用了 Gate + FFN 的方式增强非线性
     + 激活函数采用 SiLu，门控添加了更多的非线性
