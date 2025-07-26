@@ -21,3 +21,17 @@
   + $L$ 层，共计: $2Vd + 12d^2L + (2L + 1)d$
 + 训练时间复杂度
   + 矩阵乘法复杂度：元素数量 * 单一元素计算复杂度
+  + Attention 层：$n^2d$，其中 $n$ 是序列长度
+  + FFN 层：$nd^2$
+  + 总复杂度：$O(Ln^2d + Lnd^2)$
++ 推理时间复杂度
+    + Attention 层：$n^2d$
+    + FFN 层：$nd^2$
+    + 总复杂度：$O(n^2d + nd^2)$, 没有改善
+    + KV cache 降低的是 Projection 的复杂度，占用显存 2 * batch_size * num_layers * num_heads * head_dim * max_length * #(float)
++ 显存占用
+  + 模型自身：参数量，float32 或者 float16
+  + 优化器 (AdamW)：参数本身 float32，一阶动量 float32，二阶动量 float32，共计 3 * 参数量 * float32
+  + 梯度值：参数量, float32 或者 float16
+  + 激活值：不好直接刻画
+    + Attention 层：$4 * batch_size * num_layers * num_heads * head_dim * ...$
