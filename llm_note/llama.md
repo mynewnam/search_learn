@@ -53,3 +53,13 @@
 ### 多模态
 + 基本策略：Encoder + Cross Attention Adapter
 ![llama3_6](pic/llama3_6.png)
++ 核心组件
+  + Image Encoder：采用了类似于 ViT 的架构，但是有两个区别
+    + 图片大小上，初始为 `448 * 448`，卷积核大小为 `14 * 14`、stride 设置为 `14`，因此图象被切分为 `32 * 32`，每个大小为 `14 * 14`；共计 1024 个 token，每个 token 大小为 1280
+    + 在 Global 阶段，通过 `gate` 调整接受 `attention` 和 `FFN` 的程度，类似于 `hidden_states = residual + self.cross_attn_attn_gate.tanh() * hidden_states`
+    + 在特征提取上，提取了中间层特征以及最终的全局特征进行拼接，共计 `5 + 1 = 6`
+  + LLM Deocder
+    + 每隔 4 层，添加一个 Cross-Attention 层，将 text 作为 Q，图像信息作为 K/V，并且通过 `gate` 调整接受程度
+  + Vision Adapter
+    + 通过一个线性层将图像 feature 与文本 feature 进行对齐，所有层共用一个，但是 K/V 矩阵不是公用的
+![llama3_7](pic/llama3_7.png)

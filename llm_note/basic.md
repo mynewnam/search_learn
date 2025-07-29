@@ -74,3 +74,12 @@
 + AdamW
   + 更新：$w_t = w_{t-1} - \frac{\eta}{\sqrt{v_t'} + \epsilon} m_t' - \eta \lambda w_{t-1}$，其中 $\lambda$ 是权重衰减系数
   + 解决了 Adam 在训练大模型时的过拟合问题
+
+## 模型蒸馏
++ 将教师模型 (大参数量) 的知识蒸馏到学生模型 (小参数量) 中
++ 学生模型通常也需要预训练，后续进行对齐微调
++ 同时输出 soft label 和 hard label
+  + soft label：用于计算 KL 散度
+  + hard label：用于计算 Cross Entropy
+  + 损失函数为二者的加权和
++ 更进一步的还有中间层蒸馏
