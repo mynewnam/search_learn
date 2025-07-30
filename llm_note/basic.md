@@ -83,3 +83,19 @@
   + hard label：用于计算 Cross Entropy
   + 损失函数为二者的加权和
 + 更进一步的还有中间层蒸馏
+
+## FlashAttention
++ 分片计算的思想，虽然没有降低整体计算的时间复杂度和空间复杂度，但是是计算有好的
+  + 将计算分片从 HBM 移动到 SRAM，加快了计算速度和减少访存时间
+  + 没有存储注意力矩阵作为中间变量进行反向传播，尽管多出了额外的空间复杂度 $O(N)$，但将这部分存储的空间复杂度由 $O(N^2)$ 降低为 $O(N*d)$，通常来说 N >> d
+  ![basic_4](pic/basic_4.png)
+  ![basic_5](pic/basic_5.png)
+
+## PageAttention
++ vllm 优化推理过程中 KV cache 连续存储导致的大量显存占用，由于序列长度难以预测，因此 KV cache 利用率难以提高
++ PageAttention 允许在非连续的内存空间存储连续的 KV，通过将 KV cache 划分为块，每个块内包含固定数量的 key 和 value
+  + 在这种情况下，内存浪费只会发生在最后一个块中，可以接受
+  + 尤其在单 Prompt 生成多个输出的场景下，可以共享 Prefill 的键值对，节省显存
+  ![basic_6](pic/basic_6.webp)
+  + 为了确保安全，会对每个块进行引用计数，确保不会污染其它序列的解码进度
+  ![basic_7](pic/basic_7.webp)
